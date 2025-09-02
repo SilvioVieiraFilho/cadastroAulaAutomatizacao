@@ -1,4 +1,4 @@
-Feature: Funcionalidade Signup
+Feature: Funcionalidade register
 
   Scenario: Registrar um novo usuário com dados válidos
     Given que o navegador está aberto
@@ -9,4 +9,6 @@ Feature: Funcionalidade Signup
     And preenche o campo de senha com "12345"
     And clica no botão "btn-primary"
     Then você acessara a pagina logado
+
+
 

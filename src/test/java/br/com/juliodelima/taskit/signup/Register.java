@@ -16,14 +16,14 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.time.Duration;
 
-public class SignUpSteps {
+public class Register {
 
     private WebDriver navegador;
 
     @Before
     public void setUp() {
         // 🛠 Caminho personalizado do Chrome renomeado como google_1232.exe
-        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_1234.exe";
+        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
         File chromeFile = new File(caminhoChrome);
         if (!chromeFile.exists()) {
             throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
@@ -92,10 +92,8 @@ public class SignUpSteps {
     @Então("você acessara a pagina logado")
     public void voceAcessaraAPaginaLogado() {
         WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(10));
-
         // Usando o seletor pelo atributo data-testid
         WebElement elemento = wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("[data-testid='pesquisar']")));
-
         Assert.assertTrue(elemento.isDisplayed());
     }
 
