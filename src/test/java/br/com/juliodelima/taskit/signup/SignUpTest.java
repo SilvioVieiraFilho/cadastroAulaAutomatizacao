@@ -31,21 +31,18 @@ public class SignUpTest {
 
     @Before
     public void setUp() {
-        if (navegador == null) {
-            String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
-            File chromeFile = new File(caminhoChrome);
-            if (!chromeFile.exists()) {
-                throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
-            }
-
-            WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
-
-            ChromeOptions options = new ChromeOptions();
-            options.setBinary(caminhoChrome);
-            options.addArguments("--start-maximized");
-
-            navegador = new ChromeDriver(options);
+        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
+        File chromeFile = new File(caminhoChrome);
+        if (!chromeFile.exists()) {
+            throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
         }
+
+        WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
+        ChromeOptions options = new ChromeOptions();
+        options.setBinary(caminhoChrome);
+        options.addArguments("--start-maximized");
+
+        navegador = new ChromeDriver(options);
     }
 
     @After

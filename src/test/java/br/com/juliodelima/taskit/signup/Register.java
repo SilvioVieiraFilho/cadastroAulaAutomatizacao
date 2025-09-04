@@ -9,6 +9,7 @@ import io.cucumber.java.pt.Então;
 import io.cucumber.java.pt.Quando;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -20,36 +21,35 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import java.io.File;
 import java.time.Duration;
 
-public class Register  {
+public class Register {
     private Faker faker = new Faker();
     private String emailFake;
     private WebDriver navegador = BaseTest.getDriver();
+
     @Before
     public void setUp() {
-        if (navegador == null) {
-            String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
-            File chromeFile = new File(caminhoChrome);
-            if (!chromeFile.exists()) {
-                throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
-            }
-
-            WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
-
-            ChromeOptions options = new ChromeOptions();
-            options.setBinary(caminhoChrome);
-            options.addArguments("--start-maximized");
-
-            navegador = new ChromeDriver(options);
+        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
+        File chromeFile = new File(caminhoChrome);
+        if (!chromeFile.exists()) {
+            throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
         }
+
+        WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
+        ChromeOptions options = new ChromeOptions();
+        options.setBinary(caminhoChrome);
+        options.addArguments("--start-maximized");
+
+        navegador = new ChromeDriver(options);
     }
+
 
     @After
     public void tearDown() {
         if (navegador != null) {
             navegador.quit();
-            navegador = null; // Libera para o próximo teste
         }
     }
+
     @Dado("que o navegador está aberto")
     public void queONavegadorEstaAberto() {
         // Navegador já está aberto no Before
@@ -89,10 +89,16 @@ public class Register  {
         navegador.findElement(By.id("password")).sendKeys(id);
     }
 
+    @E("clica na checkbox {string}")
+    public void clicaNocheckbox(String checkbox) {
+        navegador.findElement(By.id(checkbox)).click();
+    }
+
     @E("clica no botão {string}")
     public void clicaNoBotao(String botaoClasse) {
         navegador.findElement(By.className(botaoClasse)).click();
     }
+
 
     @Então("você acessara a pagina logado")
     public void voceAcessaraAPaginaLogado() {
@@ -102,4 +108,20 @@ public class Register  {
         Assert.assertTrue(elemento.isDisplayed());
     }
 
+    @Então("ira exibir a tela da pagina admin")
+    public void iraExibirATelaDaPaginaAdmin() {
+        WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(10));
+
+        // Espera até que o texto esteja presente no elemento <p class="lead">
+        WebElement mensagem = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.lead"))
+        );
+
+        String texto = mensagem.getText();
+        Assertions.assertEquals(
+                "Este é seu sistema para administrar seu ecommerce.",
+                texto
+        );
+
+    }
 }
