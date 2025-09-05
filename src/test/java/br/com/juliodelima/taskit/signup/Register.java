@@ -11,6 +11,7 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
@@ -28,20 +29,21 @@ public class Register {
 
     @Before
     public void setUp() {
-        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
-        File chromeFile = new File(caminhoChrome);
-        if (!chromeFile.exists()) {
-            throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
+        if (navegador == null) { // 🔑 só cria se não existir
+            String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
+            File chromeFile = new File(caminhoChrome);
+            if (!chromeFile.exists()) {
+                throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
+            }
+
+            WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
+            ChromeOptions options = new ChromeOptions();
+            options.setBinary(caminhoChrome);
+            options.addArguments("--start-maximized");
+
+            navegador = new ChromeDriver(options);
         }
-
-        WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
-        ChromeOptions options = new ChromeOptions();
-        options.setBinary(caminhoChrome);
-        options.addArguments("--start-maximized");
-
-        navegador = new ChromeDriver(options);
     }
-
 
     @After
     public void tearDown() {
@@ -60,8 +62,14 @@ public class Register {
         navegador.get(url);
     }
 
-    @Quando("o usuário clica no botão {string}")
-    public void oUsuarioClicaNoBotao(String botaoClasse) {
+    @E("o usuário clica no botão entrar {string}")
+    public void oUsuarioClicaNoBotaoentrar(String botaoClasse) {
+        navegador.findElement(By.className(botaoClasse)).click();
+    }
+
+
+    @Quando("o usuário clica no botão cadastrar {string}")
+    public void oUsuarioClicaNoBotaoCadastrar(String botaoClasse) {
         navegador.findElement(By.className(botaoClasse)).click();
     }
 
@@ -99,6 +107,13 @@ public class Register {
         navegador.findElement(By.className(botaoClasse)).click();
     }
 
+    @E("preenche o campo de email com um email ja cadastrado {string}")
+    public void preencheremaicadastrado(String id) {
+        {
+            navegador.findElement(By.id("email")).sendKeys(id);
+        }
+    }
+
 
     @Então("você acessara a pagina logado")
     public void voceAcessaraAPaginaLogado() {
@@ -124,4 +139,44 @@ public class Register {
         );
 
     }
+
+    @Então("o sistema deve apresentar a tela de login")
+    public void deveSerExibidaATelaDeLogin() {
+        WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(15));
+        WebElement titulo = wait.until(ExpectedConditions.presenceOfElementLocated(
+                By.xpath("//h1[contains(@class,'font-robot') and normalize-space()='Login']")
+        ));
+
+        String textoObtido = titulo.getText();
+        String textoEsperado = "Login";
+
+        Assertions.assertEquals(textoEsperado, textoObtido, "O título exibido não corresponde ao esperado.");
+    }
+
+    @Então("você recebera uma mensagem Este email já está sendo usado")
+    public void receberumamensagemqueoemailjaestacadastrado() {
+        WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(10));
+        WebElement mensagem = wait.until(ExpectedConditions.visibilityOfElementLocated(
+                By.cssSelector("div.alert.alert-secondary.alert-dismissible > span")
+        ));
+
+        String textoObtido = mensagem.getText();
+        String textoEsperado = "Este email já está sendo usado";
+
+        Assertions.assertEquals(textoEsperado, textoObtido, "A mensagem exibida não corresponde ao esperado.");
+    }
+    @Então("tera que exibir uma mensagem comunicando que precisa ser um e-mail")
+    public void teraqueexibirumamensagemcomunicandoqueprecisaserumemail() {
+        WebElement emailInput = navegador.findElement(By.id("email"));
+
+        String validationMessage = (String) ((JavascriptExecutor) navegador)
+                .executeScript("return arguments[0].validationMessage;", emailInput);
+
+        System.out.println("Mensagem: " + validationMessage);
+
+        Assert.assertTrue(validationMessage.toLowerCase().contains("@"));
+    }
 }
+
+
+

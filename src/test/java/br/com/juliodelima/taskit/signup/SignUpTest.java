@@ -31,18 +31,20 @@ public class SignUpTest {
 
     @Before
     public void setUp() {
-        String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
-        File chromeFile = new File(caminhoChrome);
-        if (!chromeFile.exists()) {
-            throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
+        if (navegador == null) { // 🔑 só cria se não existir
+            String caminhoChrome = "C:/Program Files/Google/Chrome/Application/chrome_123.exe";
+            File chromeFile = new File(caminhoChrome);
+            if (!chromeFile.exists()) {
+                throw new RuntimeException("Chrome personalizado não encontrado no caminho: " + caminhoChrome);
+            }
+
+            WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
+            ChromeOptions options = new ChromeOptions();
+            options.setBinary(caminhoChrome);
+            options.addArguments("--start-maximized");
+
+            navegador = new ChromeDriver(options);
         }
-
-        WebDriverManager.chromedriver().browserBinary(caminhoChrome).setup();
-        ChromeOptions options = new ChromeOptions();
-        options.setBinary(caminhoChrome);
-        options.addArguments("--start-maximized");
-
-        navegador = new ChromeDriver(options);
     }
 
     @After
@@ -126,4 +128,22 @@ public class SignUpTest {
         String texto = mensagem.getText();
         Assertions.assertEquals("Email e/ou senha inválidos", texto);
     }
+
+    @Então("ira aparecer a tela da pagina admin")
+    public void iraaparcerATelaDaPaginaAdmin() {
+        WebDriverWait wait = new WebDriverWait(navegador, Duration.ofSeconds(10));
+
+        // Espera até que o texto esteja presente no elemento <p class="lead">
+        WebElement mensagem = wait.until(
+                ExpectedConditions.visibilityOfElementLocated(By.cssSelector("p.lead"))
+        );
+
+        String texto = mensagem.getText();
+        Assertions.assertEquals(
+                "Este é seu sistema para administrar seu ecommerce.",
+                texto
+        );
+
+    }
+
 }
